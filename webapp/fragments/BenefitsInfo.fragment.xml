@@ -1,0 +1,59 @@
+<core:FragmentDefinition
+    xmlns="sap.m"
+    xmlns:core="sap.ui.core"
+>
+    <Page
+        title="{i18n>benefitList}"
+        busyIndicatorDelay="0"
+        busy="{detailView>/benefitsInformation/benefitBusy}"
+    >
+        <Table
+            alternateRowColors="true"
+            items="{
+			path: 'BenefitSet',
+			templateShareable: false,
+			events: {
+                dataRequested: '.onBenefitsDataRequested',
+                dataReceived: '.onBenefitsDataReceived'
+            }
+		}"
+            noDataText="{i18n>noBenefits}"
+            visible="{= ${detailView>/benefitsInformation/benefitCount} > 0 }"
+        >
+            <columns>
+                <Column width="10rem">
+                    <Title text="{i18n>benefitName}" />
+                </Column>
+                <Column
+                    width="8rem"
+                    demandPopin="true"
+                    minScreenWidth="Tablet"
+                >
+                    <Title text="{i18n>benefitReason}" />
+                </Column>
+                <Column
+                    demandPopin="true"
+                    minScreenWidth="Tablet"
+                >
+                    <Title text="{i18n>benefitDetail}" />
+                </Column>
+            </columns>
+            <items>
+                <ColumnListItem>
+                    <cells>
+                        <ObjectIdentifier title="{BenefitName}" />
+                        <Text text="{ReasonText}" />
+                        <Text text="{Detail}" />
+                    </cells>
+                </ColumnListItem>
+            </items>
+        </Table>
+        <MessagePage
+            showHeader="false"
+            icon="sap-icon://sales-order-item"
+            text="{i18n>noBenefits}"
+            description="{i18n>noBenefitsText}"
+            visible="{= ${detailView>/benefitsInformation/benefitCount} === 0 }"
+        />
+    </Page>
+</core:FragmentDefinition>

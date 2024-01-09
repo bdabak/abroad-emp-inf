@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="utf-8"?>
+<edmx:Edmx Version="1.0" xmlns:edmx="http://schemas.microsoft.com/ado/2007/06/edmx" xmlns:m="http://schemas.microsoft.com/ado/2007/08/dataservices/metadata" xmlns:sap="http://www.sap.com/Protocols/SAPData">
+    <edmx:DataServices m:DataServiceVersion="2.0">
+        <Schema Namespace="ZHCM_UX_TABIN_SRV" xml:lang="tr" sap:schema-version="1" xmlns="http://schemas.microsoft.com/ado/2008/09/edm">
+            <Annotation Term="Core.SchemaVersion" String="1.0.0" xmlns="http://docs.oasis-open.org/odata/ns/edm"/>
+            <EntityType Name="Region" sap:content-version="1">
+                <Key>
+                    <PropertyRef Name="RegionId"/>
+                </Key>
+                <Property Name="RegionId" Type="Edm.String" Nullable="false" MaxLength="4" sap:unicode="false" sap:label="Bölge"/>
+                <Property Name="RegionName" Type="Edm.String" MaxLength="60" sap:unicode="false" sap:label="Bölge adı"/>
+                <NavigationProperty Name="CountrySet" Relationship="ZHCM_UX_TABIN_SRV.RegionToCountry" FromRole="FromRole_RegionToCountry" ToRole="ToRole_RegionToCountry"/>
+            </EntityType>
+            <EntityType Name="Country" sap:content-version="1">
+                <Key>
+                    <PropertyRef Name="RegionId"/>
+                    <PropertyRef Name="CountryId"/>
+                </Key>
+                <Property Name="RegionId" Type="Edm.String" Nullable="false" MaxLength="4" sap:unicode="false" sap:label="Bölge"/>
+                <Property Name="CountryId" Type="Edm.String" Nullable="false" MaxLength="4" sap:unicode="false" sap:label="Ülke"/>
+                <Property Name="CountryName" Type="Edm.String" MaxLength="30" sap:unicode="false" sap:label="Ülke adı"/>
+                <NavigationProperty Name="CitySet" Relationship="ZHCM_UX_TABIN_SRV.CountryToCity" FromRole="FromRole_CountryToCity" ToRole="ToRole_CountryToCity"/>
+            </EntityType>
+            <EntityType Name="City" sap:content-version="1">
+                <Key>
+                    <PropertyRef Name="RegionId"/>
+                    <PropertyRef Name="CountryId"/>
+                    <PropertyRef Name="CityId"/>
+                </Key>
+                <Property Name="RegionId" Type="Edm.String" Nullable="false" MaxLength="4" sap:unicode="false" sap:label="Bölge"/>
+                <Property Name="CountryId" Type="Edm.String" Nullable="false" MaxLength="4" sap:unicode="false" sap:label="Pers.alanı"/>
+                <Property Name="CityId" Type="Edm.String" Nullable="false" MaxLength="4" sap:unicode="false" sap:label="Pers.alt alanı"/>
+                <Property Name="CityName" Type="Edm.String" MaxLength="60" sap:unicode="false" sap:label="Şehir adı"/>
+            </EntityType>
+            <EntityType Name="ApplicationTree" sap:content-version="1">
+                <Key>
+                    <PropertyRef Name="Id"/>
+                </Key>
+                <Property Name="Id" Type="Edm.String" Nullable="false" sap:hierarchy-node-for="Id" sap:unicode="false" sap:label="Id"/>
+                <Property Name="Description" Type="Edm.String" sap:unicode="false" sap:label="Tanım"/>
+                <Property Name="ParentId" Type="Edm.String" sap:hierarchy-parent-node-for="Id" sap:unicode="false" sap:label="Bağlı olunan öğe"/>
+                <Property Name="Level" Type="Edm.Int32" sap:hierarchy-level-for="Id" sap:unicode="false" sap:label="Seviye"/>
+                <Property Name="State" Type="Edm.String" sap:hierarchy-drill-state-for="Id" sap:unicode="false" sap:label="Klasör"/>
+                <Property Name="RowType" Type="Edm.String" sap:unicode="false" sap:label="Satır tipi"/>
+                <Property Name="ApplicationKey" Type="Edm.String" sap:unicode="false" sap:label="Uygulama anahtarı"/>
+            </EntityType>
+            <EntityType Name="Application" sap:content-version="1">
+                <Key>
+                    <PropertyRef Name="ApplicationId"/>
+                </Key>
+                <Property Name="ApplicationId" Type="Edm.String" Nullable="false" MaxLength="5" sap:unicode="false" sap:label="Uygulama"/>
+                <Property Name="ApplicationKey" Type="Edm.String" MaxLength="30" sap:unicode="false" sap:label="Uygulama anahtarı"/>
+                <Property Name="ApplicationName" Type="Edm.String" MaxLength="60" sap:unicode="false" sap:label="Uygulama adı"/>
+            </EntityType>
+            <Association Name="RegionToCountry" sap:content-version="1">
+                <End Type="ZHCM_UX_TABIN_SRV.Region" Multiplicity="1" Role="FromRole_RegionToCountry"/>
+                <End Type="ZHCM_UX_TABIN_SRV.Country" Multiplicity="*" Role="ToRole_RegionToCountry"/>
+                <ReferentialConstraint>
+                    <Principal Role="FromRole_RegionToCountry">
+                        <PropertyRef Name="RegionId"/>
+                    </Principal>
+                    <Dependent Role="ToRole_RegionToCountry">
+                        <PropertyRef Name="RegionId"/>
+                    </Dependent>
+                </ReferentialConstraint>
+            </Association>
+            <Association Name="CountryToCity" sap:content-version="1">
+                <End Type="ZHCM_UX_TABIN_SRV.Country" Multiplicity="1" Role="FromRole_CountryToCity"/>
+                <End Type="ZHCM_UX_TABIN_SRV.City" Multiplicity="*" Role="ToRole_CountryToCity"/>
+                <ReferentialConstraint>
+                    <Principal Role="FromRole_CountryToCity">
+                        <PropertyRef Name="CountryId"/>
+                        <PropertyRef Name="RegionId"/>
+                    </Principal>
+                    <Dependent Role="ToRole_CountryToCity">
+                        <PropertyRef Name="CountryId"/>
+                        <PropertyRef Name="RegionId"/>
+                    </Dependent>
+                </ReferentialConstraint>
+            </Association>
+            <EntityContainer Name="ZHCM_UX_TABIN_SRV_Entities" m:IsDefaultEntityContainer="true" sap:supported-formats="atom json xlsx">
+                <EntitySet Name="RegionSet" EntityType="ZHCM_UX_TABIN_SRV.Region" sap:creatable="false" sap:updatable="false" sap:deletable="false" sap:pageable="false" sap:content-version="1"/>
+                <EntitySet Name="CountrySet" EntityType="ZHCM_UX_TABIN_SRV.Country" sap:creatable="false" sap:updatable="false" sap:deletable="false" sap:pageable="false" sap:content-version="1"/>
+                <EntitySet Name="CitySet" EntityType="ZHCM_UX_TABIN_SRV.City" sap:creatable="false" sap:updatable="false" sap:deletable="false" sap:pageable="false" sap:content-version="1"/>
+                <EntitySet Name="ApplicationTreeSet" EntityType="ZHCM_UX_TABIN_SRV.ApplicationTree" sap:creatable="false" sap:updatable="false" sap:deletable="false" sap:pageable="false" sap:content-version="1"/>
+                <EntitySet Name="ApplicationSet" EntityType="ZHCM_UX_TABIN_SRV.Application" sap:creatable="false" sap:updatable="false" sap:deletable="false" sap:pageable="false" sap:content-version="1"/>
+                <AssociationSet Name="CountryToCitySet" Association="ZHCM_UX_TABIN_SRV.CountryToCity" sap:creatable="false" sap:updatable="false" sap:deletable="false" sap:content-version="1">
+                    <End EntitySet="CountrySet" Role="FromRole_CountryToCity"/>
+                    <End EntitySet="CitySet" Role="ToRole_CountryToCity"/>
+                </AssociationSet>
+                <AssociationSet Name="RegionToCountrySet" Association="ZHCM_UX_TABIN_SRV.RegionToCountry" sap:creatable="false" sap:updatable="false" sap:deletable="false" sap:content-version="1">
+                    <End EntitySet="RegionSet" Role="FromRole_RegionToCountry"/>
+                    <End EntitySet="CountrySet" Role="ToRole_RegionToCountry"/>
+                </AssociationSet>
+            </EntityContainer>
+            <atom:link rel="self" href="http://tks0154.thy.com:8000/sap/opu/odata/sap/ZHCM_UX_TABIN_SRV/$metadata" xmlns:atom="http://www.w3.org/2005/Atom"/>
+            <atom:link rel="latest-version" href="http://tks0154.thy.com:8000/sap/opu/odata/sap/ZHCM_UX_TABIN_SRV/$metadata" xmlns:atom="http://www.w3.org/2005/Atom"/>
+        </Schema>
+    </edmx:DataServices>
+</edmx:Edmx>

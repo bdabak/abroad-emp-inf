@@ -1,0 +1,9 @@
+<core:FragmentDefinition
+    xmlns="sap.m"
+    xmlns:core="sap.ui.core"
+>
+    <core:ComponentContainer
+        id="idPayScaleComponent"
+        height="100%"
+    />
+</core:FragmentDefinition>

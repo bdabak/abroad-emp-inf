@@ -1,0 +1,104 @@
+<core:FragmentDefinition
+    xmlns="sap.m"
+    xmlns:core="sap.ui.core"
+    xmlns:cd="http://schemas.sap.com/sapui5/extension/sap.ui.core.CustomData/1"
+    xmlns:f="sap.f"
+>
+    <Table
+        alternateRowColors="true"
+        items="{
+			path: 'EmployeeSet',
+			filters: [{
+				path: 'Type',
+				operator: 'EQ',
+				value1: 'CEN'
+			}],
+			templateShareable: false,
+			events: {
+				dataRequested: '.onCentralEmployeeDataRequested',
+				dataReceived: '.onCentralEmployeeDataReceived'
+			}
+		}"
+        visible="{= ${detailView>/employeeInformation/centralEmployeeCount} > 0 }"
+        sticky="ColumnHeaders"
+        busyIndicatorDelay="0"
+        busy="{detailView>/employeeInformation/centralEmployeeBusy}"
+    >
+        <columns>
+            <Column
+                demandPopin="true"
+                minScreenWidth="Tablet"
+            >
+                <Title text="{i18n>employee}" />
+            </Column>
+            <Column>
+                <Title text="{i18n>employeeJob}" />
+            </Column>
+
+            <Column
+                width="10rem"
+                demandPopin="true"
+                minScreenWidth="Tablet"
+                hAlign="Center"
+            >
+                <Title
+                    text="{i18n>employeeDutyDaysLeft}"
+                    wrapping="true"
+                />
+            </Column>
+            <Column
+                width="6rem"
+                hAlign="Center"
+                demandPopin="true"
+                minScreenWidth="Tablet"
+            >
+                <Title text="{i18n>actionsColumn}" />
+            </Column>
+        </columns>
+        <items>
+            <ColumnListItem>
+                <cells>
+                    <HBox alignItems="Center"> 
+                        <f:Avatar
+                            src="/sap/opu/odata/sap/ZHCM_UX_TABIN_SRV/EmployeeSet('{Id}')/$value"
+                            displaySize="S"
+                            displayShape="Circle"
+                            class="sapUiTinyMarginEnd"
+                        />
+                        <ObjectIdentifier
+                            text="{Id}"
+                            title="{Name}"
+                        />
+                    </HBox>
+                    <Text text="{PositionText}" />
+
+                    <Text text="{DutyDaysLeft}" />
+                    <HBox>
+                        <Button
+                            icon="sap-icon://employee-pane"
+                            tooltip="{i18n>employeeResume}"
+                            class="sapUiTinyMarginEnd"
+                            cd:employeeId="{Id}"
+                            press=".onCallResume"
+                        />
+                        <Button
+                            icon="sap-icon://work-history"
+                            tooltip="{i18n>employeeWorkExperience}"
+                            cd:bindingPath="/EmployeeSet('{Id}')"
+                            press=".onShowWorkExperience"
+                        />
+                    </HBox>
+                </cells>
+            </ColumnListItem>
+        </items>
+    </Table>
+    <MessagePage
+        busyIndicatorDelay="0"
+        busy="{detailView>/employeeInformation/centralEmployeeBusy}"
+        showHeader="false"
+        icon="sap-icon://employee"
+        text="{i18n>noCentralEmployee}"
+        description="{i18n>noCentralEmployeeText}"
+        visible="{= ${detailView>/employeeInformation/centralEmployeeCount} === 0 }"
+    />
+</core:FragmentDefinition>

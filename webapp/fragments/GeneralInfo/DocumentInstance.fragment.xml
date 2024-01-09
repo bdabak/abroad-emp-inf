@@ -1,0 +1,23 @@
+<core:FragmentDefinition
+    xmlns="sap.m"
+    xmlns:core="sap.ui.core"
+     xmlns:cd="http://schemas.sap.com/sapui5/extension/sap.ui.core.CustomData/1"
+>
+    <GenericTile
+        class="sapUiSmallMarginTop"
+        header="{path:'DocName'}"
+        press=".onDocumentDownload"
+        frameType="Auto"
+        width="100%"
+        cd:documentLink="/DocumentSet('{DocKey}')/$value"
+    >
+        <TileContent footer="{path:'DocOwner'} {path:'DocDate', type: 'sap.ui.model.odata.type.Date', formatOptions:{pattern: 'dd.MM.yyyy'}}-{path:'DocTime', type: 'sap.ui.model.odata.type.Time', formatOptions:{pattern: 'hh:mm'}}"
+        footerColor="Neutral">
+            <core:Icon
+                color="{path:'DocExt', formatter: '.formatter.decideDocumentIconColor'}"
+                size="44px"
+                src="{path:'DocExt', formatter: '.formatter.decideDocumentIcon'}"
+            />
+        </TileContent>
+    </GenericTile>
+</core:FragmentDefinition>

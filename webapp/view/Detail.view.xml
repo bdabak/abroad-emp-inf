@@ -1,0 +1,44 @@
+<mvc:View
+    controllerName="com.thy.ux.abroadempinf.controller.Detail"
+    xmlns="sap.m"
+    xmlns:semantic="sap.f.semantic"
+    xmlns:mvc="sap.ui.core.mvc">
+
+    <semantic:SemanticPage
+        id="idDetailPage"
+        busy="{detailView>/busy}"
+        busyIndicatorDelay="0"
+        class="sapUiNoContentPadding">
+        <semantic:titleHeading>
+           <Breadcrumbs id="idDetailPageBreadcrumb" currentLocationText="{Application/ApplicationName}" separatorStyle="DoubleGreaterThan">
+				<Link  id="idDetailPageBreadcrumbRegionLink" text="{Region/RegionName}"/>
+				<Link   id="idDetailPageBreadcrumbCountryLink" text="{Country/CountryName}"/>
+				<Link  id="idDetailPageBreadcrumbCityLink" text="{City/CityName}"/>
+			</Breadcrumbs>
+        </semantic:titleHeading>
+        <semantic:content>
+            
+        </semantic:content>
+
+        <semantic:closeAction>
+            <semantic:CloseAction
+                    id="closeColumn"
+                    press=".onCloseDetailPress"/>
+        </semantic:closeAction>
+
+        <semantic:fullScreenAction>
+            <semantic:FullScreenAction
+                    id="enterFullScreen"
+                    visible="{= !${device>/system/phone} &amp;&amp; !${appView>/actionButtonsInfo/midColumn/fullScreen}}"
+                    press=".toggleFullScreen"/>
+        </semantic:fullScreenAction>
+        <semantic:exitFullScreenAction>
+            <semantic:ExitFullScreenAction
+                    id="exitFullScreen"
+                    visible="{= !${device>/system/phone} &amp;&amp; ${appView>/actionButtonsInfo/midColumn/fullScreen}}"
+                    press=".toggleFullScreen"/>
+        </semantic:exitFullScreenAction>
+
+    </semantic:SemanticPage>
+
+</mvc:View>

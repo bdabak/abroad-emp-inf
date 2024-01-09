@@ -1,0 +1,210 @@
+{
+    "_version": "1.17.0",
+    "sap.app": {
+        "id": "com.thy.ux.abroadempinf",
+        "type": "application",
+        "i18n": "i18n/i18n.properties",
+        "applicationVersion": {
+            "version": "0.0.1"
+        },
+        "title": "{{appTitle}}",
+        "description": "{{appDescription}}",
+        "resources": "resources.json",
+        "sourceTemplate": {
+            "id": "@sap/generator-fiori:listdetail",
+            "version": "1.9.0",
+            "toolsId": "fe8e5f52-cb8c-4f4b-ba84-477ddbedce32"
+        },
+        "dataSources": {
+            "mainService": {
+                "uri": "/sap/opu/odata/sap/ZHCM_UX_TABIN_SRV/",
+                "type": "OData",
+                "settings": {
+                    "annotations": [],
+                    "localUri": "localService/metadata.xml",
+                    "odataVersion": "2.0"
+                }
+            }
+        }
+    },
+    "sap.ui": {
+        "technology": "UI5",
+        "icons": {
+            "icon": "",
+            "favIcon": "",
+            "phone": "",
+            "phone@2": "",
+            "tablet": "",
+            "tablet@2": ""
+        },
+        "deviceTypes": {
+            "desktop": true,
+            "tablet": true,
+            "phone": true
+        }
+    },
+    "sap.ui5": {
+        "flexEnabled": false,
+        "config": {
+            "fullWidth": true
+        },
+        "resourceRoots": {
+            "ZHCM_YD_SKALA": "/sap/bc/ui5_ui5/sap/ZHCM_YD_SKALA"
+        },
+        "componentUsages": {
+            "scaleDisplayComponent": {
+                "name": "ZHCM_YD_SKALA",
+                "settings": {},
+                "componentData": {},
+                "lazy": true
+            }
+        },
+        "dependencies": {
+            "minUI5Version": "1.71.61",
+            "libs": {
+                "sap.m": {},
+                "sap.ui.core": {},
+                "sap.f": {},
+                "sap.suite.ui.generic.template": {},
+                "sap.ui.comp": {},
+                "sap.ui.generic.app": {},
+                "sap.ui.table": {},
+                "sap.ushell": {}
+            },
+            "components": {
+                "hcm.employee.lookup": {}
+            }
+        },
+        "contentDensities": {
+            "compact": true,
+            "cozy": true
+        },
+        "models": {
+            "i18n": {
+                "type": "sap.ui.model.resource.ResourceModel",
+                "settings": {
+                    "bundleName": "com.thy.ux.abroadempinf.i18n.i18n"
+                }
+            },
+            "": {
+                "dataSource": "mainService",
+                "preload": true,
+                "settings": {}
+            }
+        },
+        "resources": {
+            "css": [
+                {
+                    "uri": "./style/custom.css"
+                }
+            ]
+        },
+        "routing": {
+            "config": {
+                "routerClass": "sap.f.routing.Router",
+                "viewType": "XML",
+                "viewPath": "com.thy.ux.abroadempinf.view",
+                "controlId": "layout",
+                "controlAggregation": "beginColumnPages",
+                "bypassed": {
+                    "target": [
+                        "notFound"
+                    ]
+                },
+                "async": true
+            },
+            "routes": [
+                {
+                    "pattern": "",
+                    "name": "list",
+                    "target": "list"
+                },
+                {
+                    "pattern": "notAuthorized",
+                    "name": "notAuthorized",
+                    "target": "notAuthorized"
+                },
+                {
+                    "pattern": "ApplicationTreeSet/{objectId}",
+                    "name": "detail",
+                    "target": [
+                        "list",
+                        "detail"
+                    ]
+                },
+                {
+                    "name": "employeeLookup",
+                    "pattern": "ApplicationTreeSet/{objectId}/employee",
+                    "target": [
+                        "list",
+                        "detail",
+                        {
+                            "name": "employeeLookup",
+                            "prefix": "e"
+                        }
+                    ]
+                },
+                {
+                    "name": "scaleDisplay",
+                    "pattern": "ApplicationTreeSet/{objectId}/scale",
+                    "target": [
+                        "list",
+                        "detail",
+                        {
+                            "name": "scaleDisplay",
+                            "prefix": "s"
+                        }
+                    ]
+                }
+            ],
+            "targets": {
+                "list": {
+                    "viewName": "List",
+                    "viewLevel": 1,
+                    "viewId": "list"
+                },
+                "detail": {
+                    "viewName": "Detail",
+                    "viewId": "detail",
+                    "viewLevel": 1,
+                    "controlAggregation": "midColumnPages"
+                },
+                "employeeLookup": {
+                    "type": "Component",
+                    "usage": "employeeLookupComponent",
+                    "parent": "detail",
+                    "controlId": "idDetailPage",
+                    "controlAggregation": "content",
+                    "id": "idEmployeeLookupComponent"
+                },
+                "scaleDisplay": {
+                    "type": "Component",
+                    "usage": "scaleDisplayComponent",
+                    "parent": "detail",
+                    "controlId": "idDetailPage",
+                    "controlAggregation": "content",
+                    "id": "idScaleDisplayComponent"
+                },
+                "detailObjectNotFound": {
+                    "viewName": "DetailObjectNotFound",
+                    "viewId": "detailObjectNotFound",
+                    "controlAggregation": "midColumnPages"
+                },
+                "notFound": {
+                    "viewName": "NotFound",
+                    "viewId": "notFound"
+                },
+                "notAuthorized": {
+                    "viewName": "NotAuthorized",
+                    "viewId": "notAuthorized"
+                }
+            }
+        },
+        "rootView": {
+            "viewName": "com.thy.ux.abroadempinf.view.App",
+            "type": "XML",
+            "async": true,
+            "id": "app"
+        }
+    }
+}

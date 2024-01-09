@@ -1,0 +1,36 @@
+<core:FragmentDefinition
+    xmlns:l="sap.ui.layout"
+    xmlns="sap.m"
+    xmlns:core="sap.ui.core"
+>
+    <l:Grid
+        defaultSpan="XL2 L3 M4 S12"
+        content="{
+            path:'DocumentSet', 
+            templateShareable: false,
+            filters:[{
+                path:'DocType', operator: 'EQ', value1: '002'
+            }],
+            events: {
+                dataRequested: '.onHRBPDocumentDataRequested',
+                dataReceived: '.onHRBPDocumentDataReceived'
+            }
+        }"
+        busyIndicatorDelay="0"
+        busy="{detailView>/generalInformation/hrbpBusy}"
+    >
+        <core:Fragment
+            fragmentName="com.thy.ux.abroadempinf.fragments.GeneralInfo.DocumentInstance"
+            type="XML"
+        />
+    </l:Grid>
+    <MessagePage
+        showHeader="false"
+        icon="sap-icon://document"
+        text="{i18n>noDocumentFoundTitle}"
+        description="{i18n>noDocumentFoundText}"
+        visible="{= ${detailView>/generalInformation/hrbpReportCount} === 0 }"
+        busyIndicatorDelay="0"
+        busy="{detailView>/generalInformation/hrbpBusy}"
+    />
+</core:FragmentDefinition>

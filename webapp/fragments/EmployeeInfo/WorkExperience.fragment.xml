@@ -1,0 +1,72 @@
+<core:FragmentDefinition
+    xmlns="sap.m"
+    xmlns:core="sap.ui.core"
+>
+    <ResponsivePopover
+        id="idWorkExpResponsivePopover"
+        class="sapUiResponsivePadding--header sapUiResponsivePadding--footer"
+        placement="Left"
+        afterClose=".onAfterCloseWorkExperience"
+        contentWidth="{= ${device>/system/desktop} ? '70%' : '90%' }"
+        title="{i18n>workExperiences} - {Name}"
+    >
+        <content>
+        <Table
+            alternateRowColors="true"
+            items="{
+			path: 'WorkExperienceSet',
+			templateShareable: false,
+			events: {
+				dataRequested: '.onWorkExperienceDataRequested',
+				dataReceived: '.onWorkExperienceDataReceived'
+			}
+		}"
+            noDataText="{i18n>noWorkExperienceData}"
+            sticky="ColumnHeaders"
+            busyIndicatorDelay="0"
+            busy="{detailView>/workExperience/busy}"
+        >
+            <columns>
+                <Column>
+                    <Text text="{i18n>workExperienceEntryDate}" />
+                </Column>
+                <Column>
+                    <Text text="{i18n>workExperienceLeaveDate}" />
+                </Column>
+                <Column>
+                    <Text text="{i18n>workExperienceEmployerName}" />
+                </Column>
+
+                <Column demandPopin="true" minScreenWidth="Tablet">
+                    <Text text="{i18n>workExperienceJobTitle}" />
+                </Column>
+                <Column demandPopin="true" minScreenWidth="Tablet">
+                    <Text text="{i18n>workExperienceWorkingType}" />
+                </Column>
+                <Column demandPopin="true" minScreenWidth="Tablet">
+                    <Text text="{i18n>workExperienceBranch}" />
+                </Column>
+                <Column demandPopin="true" minScreenWidth="Tablet">
+                    <Text text="{i18n>workExperienceCountry}" />
+                </Column>
+            </columns>
+            <items>
+                <ColumnListItem>
+                    <cells>
+                        <Text text="{path:'StartDate', type:'sap.ui.model.odata.type.DateTime', formatOptions: {pattern:'dd MMM YYYY'}}" />
+                        <Text text="{path:'EndDate', type:'sap.ui.model.odata.type.DateTime', formatOptions: {pattern:'dd MMM YYYY'}}" />
+                        <Text text="{EmployerTitle}" />
+                        <Text text="{JobTitle}" />
+                        <Text text="{WorkingDescription}" />
+                        <Text text="{BranchName}" />
+                        <Text text="{CountryName}" />                        
+                    </cells>
+                </ColumnListItem>
+            </items>
+        </Table>
+        </content>
+        <endButton>
+            <Button press=".onCloseWorkExperience" text="{i18n>closeAction}"/>
+        </endButton>
+    </ResponsivePopover>
+</core:FragmentDefinition>

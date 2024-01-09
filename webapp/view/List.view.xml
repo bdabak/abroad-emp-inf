@@ -1,0 +1,148 @@
+<mvc:View
+    controllerName="com.thy.ux.abroadempinf.controller.List"
+    xmlns="sap.m"
+    xmlns:ui="sap.ui.table"
+    xmlns:semantic="sap.f.semantic"
+    xmlns:mvc="sap.ui.core.mvc"
+    xmlns:core="sap.ui.core"
+    xmlns:cd="http://schemas.sap.com/sapui5/extension/sap.ui.core.CustomData/1"
+>
+    <semantic:SemanticPage
+        id="listPage"
+        preserveHeaderStateOnScroll="true"
+        toggleHeaderOnTitleClick="false"
+        class="thyAbroadEmpInfoPage sapUiNoContentPadding"
+    >
+        <semantic:titleHeading>
+            <Title
+                id="listPageTitle"
+                text="{i18n>regions}"
+                level="H3"
+            />
+        </semantic:titleHeading>
+        		<semantic:titleCustomIconActions>
+			<OverflowToolbarButton icon="sap-icon://map" press=".onTreeLocateNode" text="{i18n>navigateToCurrent}" visible="{= ${appView>/layout} === 'TwoColumnsMidExpanded'}"/>
+			<OverflowToolbarButton icon="sap-icon://collapse-all" press=".onTreeCollapseAll" text="{i18n>collapse}" />
+			<OverflowToolbarButton icon="sap-icon://expand-all" press=".onTreeExpandAll" text="{i18n>expand}}"/>
+		</semantic:titleCustomIconActions>
+        <semantic:content>
+            <Tree
+                id="idAppTree"
+                items="{path: '/ApplicationTreeSet',
+                        parameters:{
+                            numberOfExpandedLevels:1
+                        },
+                        events: {
+                            dataRequested: '.onTreeDataRequested',
+                            dataReceived: '.onTreeDataReceived'
+                        }
+                }"
+                updateFinished=".onTreeUpdateFinished"
+                itemPress=".onItemPressed"
+                toggleOpenState=".onToggleOpenState"
+                inset="false"
+                busyIndicatorDelay="0"
+                noDataText="{i18n>nothingFound}"
+            >
+                <items>
+                    <StandardTreeItem
+                        type="{= ${RowType} === 'APP' ? 'Navigation' : 'Inactive' }"
+                        title="{Description}"
+                        icon="{parts:[{path: 'RowType'}, {path:'Icon'}], formatter:'.formatter.getIconUrl' }"
+                        cd:applicationId="{Id}"
+                    >
+                        <customData>
+                            <core:CustomData
+                                key="row-type"
+                                value="{= ${RowType}.toLowerCase() }"
+                                writeToDom="true"
+                            />
+                        </customData>
+                    </StandardTreeItem>
+                </items>
+            </Tree>
+            <!-- For client side filtering add this to the items attribute: parameters: {operationMode: 'Client'}}"
+            <List
+                id="list"
+                width="auto"
+                class="sapFDynamicPageAlignContent"
+                items="{
+                    path: '/ApplicationTreeSet',
+                    sorter: {
+                        path: 'Id',
+                        descending: false
+                    },
+                    groupHeaderFactory: '.createGroupHeader'
+                }"
+                busyIndicatorDelay="{listView>/delay}"
+                noDataText="{listView>/noDataText}"
+                mode="{= ${device>/system/phone} ? 'None' : 'SingleSelectMaster'}"
+                growing="true"
+                growingScrollToLoad="true"
+                updateFinished=".onUpdateFinished"
+                selectionChange=".onSelectionChange">
+
+                <infoToolbar>
+                    <Toolbar
+                        active="true"
+                        id="filterBar"
+                        visible="{listView>/isFilterBarVisible}"
+                        press=".onOpenViewSettings">
+                        <Title
+                            id="filterBarLabel"
+                            text="{listView>/filterBarLabel}"
+                            level="H3"/>
+                    </Toolbar>
+                </infoToolbar>
+
+                <headerToolbar>
+                    <OverflowToolbar>
+                        <SearchField
+                            id="searchField"
+                            showRefreshButton="true"
+                            tooltip="{i18n>listSearchTooltip}"
+                            search=".onSearch"
+                            width="auto">
+                            <layoutData>
+                                <OverflowToolbarLayoutData
+                                    minWidth="150px"
+                                    maxWidth="240px"
+                                    shrinkable="true"
+                                    priority="NeverOverflow"/>
+                            </layoutData>
+                        </SearchField>
+                        <ToolbarSpacer/>
+                        <Button
+                            id="sortButton"
+                            press=".onOpenViewSettings"
+                            icon="sap-icon://sort"
+                            type="Transparent"/>
+
+                        <Button
+                            id="filterButton"
+                            press=".onOpenViewSettings"
+                            icon="sap-icon://filter"
+                            type="Transparent"/>
+                        <Button
+                            id="groupButton"
+                            press=".onOpenViewSettings"
+                            icon="sap-icon://group-2"
+                            type="Transparent"/>
+
+                    </OverflowToolbar>
+                </headerToolbar>
+                <items>
+                    <ObjectListItem
+                        type="Navigation"
+                        press=".onSelectionChange"
+                        title="{Id}"
+                        number="{
+                            path: 'Level',
+                            formatter: '.formatter.numberUnit'
+                        }"
+                        unit="{RowType}" />
+                </items>
+            </List> -->
+        </semantic:content>
+    </semantic:SemanticPage>
+</mvc:View>

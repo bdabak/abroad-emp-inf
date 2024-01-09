@@ -1,0 +1,18 @@
+<mvc:View
+    controllerName="com.thy.ux.abroadempinf.controller.NotAuthorized"
+    xmlns="sap.m"
+    xmlns:mvc="sap.ui.core.mvc">
+
+    <MessagePage
+        id="idAuthPage"
+        title="{i18n>notAuthorizedTitle}"
+        text="{i18n>notAuthorizedText}"
+        description="{i18n>notAuthorizedDescription}"
+        icon="sap-icon://permission"
+        navButtonPress=".onNavBack"
+        showNavButton="true"
+        >
+
+    </MessagePage>
+
+</mvc:View>
