@@ -4,89 +4,98 @@
     xmlns:core="sap.ui.core"
     xmlns:cd="http://schemas.sap.com/sapui5/extension/sap.ui.core.CustomData/1"
 >
-    <Table
-        alternateRowColors="true"
-        items="{
-			path: 'EmployeeSet',
-			filters: [{
-				path: 'Type',
-				operator: 'EQ',
-				value1: 'LOC'
-			}],
-			templateShareable: false,
-			events: {
-				dataRequested: '.onLocalEmployeeDataRequested',
-				dataReceived: '.onLocalEmployeeDataReceived'
-			}
-		}"
-        visible="{= ${detailView>/employeeInformation/localEmployeeCount} > 0 }"
-        sticky="ColumnHeaders"
-        busyIndicatorDelay="0"
-        busy="{detailView>/employeeInformation/localEmployeeBusy}"
-    >
-        <columns>
-            <Column
-                demandPopin="true"
-                minScreenWidth="Tablet"
-            >
-                <Title text="{i18n>employee}" />
-            </Column>
-            <Column>
-                <Title text="{i18n>employeeJob}" />
-            </Column>
-
-            <Column
-                width="6rem"
-                hAlign="Center"
-                demandPopin="true"
-                minScreenWidth="Tablet"
-            >
-                <Title text="{i18n>actionsColumn}" />
-            </Column>
-        </columns>
-        <items>
-            <ColumnListItem>
-                <cells>
-                    <HBox alignItems="Center">
-                        <f:Avatar
-                            src="/sap/opu/odata/sap/ZHCM_UX_TABIN_SRV/EmployeeSet('{Id}')/$value"
-                            displaySize="S"
-                            displayShape="Circle"
-                            class="sapUiTinyMarginEnd"
-                        />
-                        <ObjectIdentifier
-                            text="{Id}"
-                            title="{Name}"
-                        />
-                    </HBox>
-                    <Text text="{PositionText}" />
-
-                    <HBox>
-                        <Button
-                            icon="sap-icon://employee-pane"
-                            tooltip="{i18n>employeeResume}"
-                            class="sapUiTinyMarginEnd"
-                            cd:employeeId="{Id}"
-                            press=".onCallResume"
-                        />
-                        <Button
-                            icon="sap-icon://work-history"
-                            tooltip="{i18n>employeeWorkExperience}"
-                            cd:bindingPath="/EmployeeSet('{Id}')"
-                            press=".onShowWorkExperience"
-                        />
-                    </HBox>
-                </cells>
-            </ColumnListItem>
-        </items>
-    </Table>
-    <MessagePage
-        busyIndicatorDelay="0"
-        busy="{detailView>/employeeInformation/localEmployeeBusy}"
+    <Page
+        showFooter="false"
         showHeader="false"
-        icon="sap-icon://employee"
-        text="{i18n>noLocalEmployee}"
-        description="{i18n>noLocalEmployeeText}"
-        visible="{= ${detailView>/employeeInformation/localEmployeeCount} === 0 }"
-    />
+    >
+        <Table
+            alternateRowColors="true"
+            items="{
+                path: 'EmployeeSet',
+                filters: [{
+                    path: 'Type',
+                    operator: 'EQ',
+                    value1: 'LOC'
+                }],
+                templateShareable: false,
+                events: {
+                    dataRequested: '.onLocalEmployeeDataRequested',
+                    dataReceived: '.onLocalEmployeeDataReceived'
+                }
+            }"
+            visible="{= ${detailView>/employeeInformation/localEmployeeCount} > 0 }"
+            sticky="ColumnHeaders"
+            busyIndicatorDelay="0"
+            busy="{detailView>/employeeInformation/localEmployeeBusy}"
+        >
+            <columns>
+                <Column
+                    demandPopin="true"
+                    minScreenWidth="Tablet"
+                >
+                    <Title text="{i18n>employee}" />
+                </Column>
+                <Column>
+                    <Title text="{i18n>employeeJob}" />
+                </Column>
+                <Column
+                    width="6rem"
+                    hAlign="Center"
+                    demandPopin="true"
+                    minScreenWidth="Tablet"
+                >
+                    <Title text="{i18n>actionsColumn}" />
+                </Column>
+            </columns>
+            <items>
+                <ColumnListItem>
+                    <cells>
+                        <HBox alignItems="Center">
+                            <f:Avatar
+                                src="/sap/opu/odata/sap/ZHCM_UX_TABIN_SRV/EmployeeSet('{Id}')/$value"
+                                displaySize="S"
+                                displayShape="Circle"
+                                class="sapUiTinyMarginEnd"
+                            />
+                            <ObjectIdentifier
+                                text="{
+                                    path: 'Id',
+                                    formatter: '.formatter.suppressLeadingZero'
+                                }"
+                                title="{Name}"
+                            />
+                            <core:Icon tooltip="Kanat" src="sap-icon://badge" size="24px" color="#bb2207" class="sapUiMediumMarginBegin wingBadge" visible="{= ${HasWing} === true }" />
+
+                        </HBox>
+                        <Text text="{PositionText}" />
+                        <HBox>
+                            <Button
+                                icon="sap-icon://employee-pane"
+                                tooltip="{i18n>employeeResume}"
+                                class="sapUiTinyMarginEnd"
+                                cd:employeeId="{Id}"
+                                cd:employeeName="{Name}"
+                                press=".onCallResume"
+                            />
+                            <Button
+                                icon="sap-icon://work-history"
+                                tooltip="{i18n>employeeWorkExperience}"
+                                cd:bindingPath="/EmployeeSet('{Id}')"
+                                press=".onShowWorkExperience"
+                            />
+                        </HBox>
+                    </cells>
+                </ColumnListItem>
+            </items>
+        </Table>
+        <MessagePage
+            busyIndicatorDelay="0"
+            busy="{detailView>/employeeInformation/localEmployeeBusy}"
+            showHeader="false"
+            icon="sap-icon://employee"
+            text="{i18n>noLocalEmployee}"
+            description="{i18n>noLocalEmployeeText}"
+            visible="{= ${detailView>/employeeInformation/localEmployeeCount} === 0 }"
+        />
+    </Page>
 </core:FragmentDefinition>

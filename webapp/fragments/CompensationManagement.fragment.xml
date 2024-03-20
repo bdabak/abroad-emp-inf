@@ -1,0 +1,217 @@
+<c:FragmentDefinition
+  xmlns="sap.m"
+  xmlns:c="sap.ui.core"
+  xmlns:f="sap.f"
+  xmlns:cd="http://schemas.sap.com/sapui5/extension/sap.ui.core.CustomData/1"
+>
+  <Page
+    title="{i18n>wageIncrease}"
+    busyIndicatorDelay="0"
+    busy="{detailView>/compensationManagement/busy}"
+    showFooter="{= ${detailView>/compensationManagement/employeeCount} > 0 }"
+    class="compensationPage"
+    floatingFooter="true"
+  >
+    <Table
+      alternateRowColors="true"
+      popinLayout="GridLarge"
+      items="{
+        path: 'detailView>/compensationManagement/compensationData'
+      }"
+      noDataText="{i18n>noEmployeeFound}"
+      visible="{= ${detailView>/compensationManagement/employeeCount} > 0 }"
+      sticky="ColumnHeaders"
+    >
+      <columns>
+        <Column width="{= ${device>/system/desktop} ? '25rem' : '100%'}">
+          <Label text="{i18n>employee}" />
+        </Column>
+        <Column
+          hAlign="Center"
+          demandPopin="true"
+          minScreenWidth="Desktop"
+        >
+          <Label text="{i18n>currentWage}" />
+        </Column>
+        <Column
+          hAlign="Center"
+          demandPopin="true"
+          minScreenWidth="Desktop"
+        >
+          <Label text="{i18n>newWageRange}" />
+        </Column>
+        <Column
+          hAlign="Center"
+          demandPopin="true"
+          minScreenWidth="Desktop"
+        >
+          <Label text="{i18n>newWage}" />
+        </Column>
+        <Column
+          hAlign="Right"
+          demandPopin="true"
+          minScreenWidth="Desktop"
+        >
+          <Label text="{i18n>increaseRate}" />
+        </Column>
+      </columns>
+      <items>
+        <ColumnListItem>
+          <cells>
+            <HBox
+              alignItems="Center"
+              justifyContent="SpaceBetween"
+            >
+              <HBox alignItems="Center">
+                <f:Avatar
+                  src="/sap/opu/odata/sap/ZHCM_UX_TABIN_SRV/EmployeeSet('{detailView>Id}')/$value"
+                  displaySize="S"
+                  displayShape="Circle"
+                  class="sapUiTinyMarginEnd"
+                  press=".onCompEmployeeInfoPress"
+                  cd:EmployeeData="{detailView>}"
+                />
+                <ObjectIdentifier
+                  text="{
+                    path: 'detailView>PositionText'
+                  }"
+                  title="{detailView>EmployeeName} ({
+                    path: 'detailView>Id',
+                    formatter: '.formatter.suppressLeadingZero'
+                  })"
+                />
+              </HBox>
+              <Button
+                icon="sap-icon://history"
+                press=".onCompEmployeePress"
+                cd:ExperienceInYears="{detailView>ExperienceInYears}"
+                cd:SeniorityInYears="{detailView>SeniorityInYears}"
+                tooltip="{i18n>SENIORITY_EXPERIENCE}"
+              />
+            </HBox>
+            <HBox
+              alignItems="Center"
+              justifyContent="{= ${device>/system/desktop} ? 'Center' : 'Left'}"
+            >
+              <Text
+                text="{
+                  parts: ['detailView>CurrentWage', 'detailView>Currency'],
+                  type: 'sap.ui.model.type.Currency',
+                  formatOptions: {
+                    showMeasure: false
+                  }
+                }"
+                class="sapUiTinyMarginEnd"
+              />
+              <Text text="{
+                path: 'detailView>Currency'
+              }" />
+            </HBox>
+            <HBox
+              alignItems="Center"
+              justifyContent="{= ${device>/system/desktop} ? 'Center' : 'Left'}"
+            >
+              <Text text="{
+                parts: ['detailView>WageRangeMin', 'detailView>Currency'],
+                type: 'sap.ui.model.type.Currency',
+                formatOptions: {
+                  showMeasure: false
+                }
+              }" />
+              <Text
+                text="-"
+                class="sapUiTinyMarginBeginEnd"
+              />
+              <Text text="{
+                parts: ['detailView>WageRangeMax', 'detailView>Currency'],
+                type: 'sap.ui.model.type.Currency',
+                formatOptions: {
+                  showMeasure: false
+                }
+              }" />
+            </HBox>
+            <HBox
+              alignItems="Center"
+              justifyContent="{= ${device>/system/desktop} ? 'Center' : 'Left'}"
+            >
+              <Input
+                value="{
+                  parts:['detailView>NewWage', 'detailView>Currency'],
+                  type: 'sap.ui.model.type.Currency',
+                  formatOptions: {
+                    showMeasure: false,
+                    groupingEnabled: false,
+                    decimalSeparator: ',',
+                    groupingSeparator: '.'
+                  }
+                }"
+                textAlign="Right"
+                change=".onWageEntered"
+                cd:CompData="{detailView>}"
+              />
+              <Button
+                icon="{= ${detailView>OverLimit} === true ? 'sap-icon://email' : '' }"
+                class="sapUiTinyMarginBegin"
+                enabled="{= ${detailView>OverLimit} === true }"
+                type="{= ${detailView>OverLimit} === true ? ${detailView>MailTriggered} === true ? 'Accept' : 'Reject' : 'Transparent'}"
+                press=".onCompEmailPress"
+                cd:EmployeeId="{detailView>Id}"
+                cd:EmployeeName="{detailView>EmployeeName}"
+                tooltip="{i18n>REPORT_EXCCESSIVE_INCREASE}"
+              />
+            </HBox>
+            <Text text="{
+              path: 'detailView>IncreasePercentage',
+              type: 'sap.ui.model.type.Float',
+              formatOptions: {
+                minFractionDigits: 2,
+                maxFractionDigits: 2
+              }
+            }" />
+          </cells>
+        </ColumnListItem>
+      </items>
+    </Table>
+    <MessagePage
+      showHeader="false"
+      icon="sap-icon://sales-order-item"
+      text="{i18n>noEmployeeFound}"
+      description="{i18n>noCompensationEmployeeFoundText}"
+      visible="{= ${detailView>/compensationManagement/employeeCount} === 0 }"
+    />
+    <footer>
+      <Toolbar>
+        <ToolbarSpacer />
+        <HBox alignItems="Center">
+          <Text
+            text="{i18n>averageIncreaseRate}:"
+            class="sapUiTinyMarginEnd"
+          />
+          <Input
+            width="100px"
+            textAlign="Center"
+            id="idAverageIncreaseRate"
+            busyIndicatorDelay="0"
+            editable="false"
+            value="{
+              path: 'detailView>/compensationManagement/increaseRateAverage',
+              type: 'sap.ui.model.type.Float',
+              formatOptions: {
+                minFractionDigits: 2,
+                maxFractionDigits: 2
+              }
+            }"
+          />
+        </HBox>
+        <ToolbarSpacer />
+        <Button
+          type="{= ${detailView>/compensationManagement/saveAllowed} === true ? 'Accept' : 'Reject'}"
+          icon="sap-icon://save"
+          text="{i18n>SAVE_ACTION}"
+          press=".onCompSaveChanges"
+          enabled="{= ${detailView>/compensationManagement/saveAllowed} === true }"
+        />
+      </Toolbar>
+    </footer>
+  </Page>
+</c:FragmentDefinition>

@@ -1,7 +1,9 @@
 sap.ui.define([
     "./BaseController",
+    "com/smod/ux/lib/thirdparty/swal",
+    "com/smod/ux/lib/thirdparty/lodash",
     "sap/ui/model/json/JSONModel"
-], function (BaseController, JSONModel) {
+], function (BaseController, SwalJS, LodahsJS, JSONModel) {
     "use strict";
 
     return BaseController.extend("com.thy.ux.abroadempinf.controller.App", {

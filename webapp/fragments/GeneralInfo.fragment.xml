@@ -1,38 +1,75 @@
 <core:FragmentDefinition
     xmlns="sap.m"
     xmlns:core="sap.ui.core"
+    xmlns:md="com.smod.ux.mat.controls"
 >
-    <TabContainer class="tabsWithoutCloseButton">
-        <items>
-            <TabContainerItem id="idTabContainerMercerReports" name="{i18n>mercerReports}{path: 'detailView>/generalInformation/mercerReportCount', formatter:'.formatter.suppressZero'}">
-                <content>
+
+        <md:TabContainer class="mdTabContainer">
+            <md:tabs>
+                <md:Tab
+                    id="idTabContainerMercerReports"
+                    tabIndex="0"
+                    title="{i18n>mercerReports}{
+                        path: 'detailView>/generalInformation/mercerReportCount',
+                        formatter: '.formatter.suppressZero'
+                    }"
+                />
+                <md:Tab
+                    id="idTabContainerHRBPCountryReports"
+                    tabIndex="1"
+                    title="{i18n>hrBpReports}{
+                        path: 'detailView>/generalInformation/hrbpReportCount',
+                        formatter: '.formatter.suppressZero'
+                    }"
+                    visible="{= ${Hrbpd} === true }"
+                />
+                  <md:Tab
+                    id="idTabContainerDraftContractsLocal"
+                    tabIndex="2"
+                    title="{i18n>draftContractsLocal}{path: 'detailView>/generalInformation/draftContractLocalCount', formatter:'.formatter.suppressZero'}"
+                />
+                  <md:Tab
+                    id="idTabContainerDraftContractsCentral"
+                    tabIndex="3"
+                    title="{i18n>draftContractsCentral}{path: 'detailView>/generalInformation/draftContractCentralCount', formatter:'.formatter.suppressZero'}"
+                />
+                  <md:Tab
+                    id="idTabContainerLegalRegulations"
+                    tabIndex="4"
+                    title="{i18n>legalRegulations}{path: 'detailView>/generalInformation/legalRegulationsCount', formatter:'.formatter.suppressZero'}"
+                />
+            </md:tabs>
+            <md:tabPanels>
+                <md:TabPanel tabIndex="0" class="mdTabPanel">
                     <core:Fragment
                         fragmentName="com.thy.ux.abroadempinf.fragments.GeneralInfo.MercerReports"
-						type="XML"
+                        type="XML"
                     />
-                </content>
-            </TabContainerItem>
-            <TabContainerItem id="idTabContainerHRBPCountryReports"  name="{i18n>hrBpReports}{path: 'detailView>/generalInformation/hrbpReportCount', formatter:'.formatter.suppressZero'}">
-                <content>
+                </md:TabPanel>
+                <md:TabPanel tabIndex="1" class="mdTabPanel" >
                     <core:Fragment
                         fragmentName="com.thy.ux.abroadempinf.fragments.GeneralInfo.HRBPCountryReports"
+                        type="XML"
+                    />
+                </md:TabPanel>
+                 <md:TabPanel tabIndex="2" class="mdTabPanel">
+                     <core:Fragment
+                        fragmentName="com.thy.ux.abroadempinf.fragments.GeneralInfo.DraftContractsLocal"
 						type="XML"
                     />
-                </content>
-            </TabContainerItem>
-            <!-- <TabContainerItem name="{i18n>leaveInformation}" >
-                <content>
-                    <Text text="{i18n>leaveInformation}" />
-                </content>
-            </TabContainerItem> -->
-            <TabContainerItem id="idTabContainerDraftContracts" name="{i18n>draftContracts}{path: 'detailView>/generalInformation/draftContractCount', formatter:'.formatter.suppressZero'}">
-                <content>
+                </md:TabPanel>
+                 <md:TabPanel tabIndex="3" class="mdTabPanel">
                     <core:Fragment
-                        fragmentName="com.thy.ux.abroadempinf.fragments.GeneralInfo.DraftContracts"
+                        fragmentName="com.thy.ux.abroadempinf.fragments.GeneralInfo.DraftContractsCentral"
 						type="XML"
                     />
-                </content>
-            </TabContainerItem>
-        </items>
-    </TabContainer>
+                </md:TabPanel>
+                 <md:TabPanel tabIndex="4" class="mdTabPanel">
+                     <core:Fragment
+                        fragmentName="com.thy.ux.abroadempinf.fragments.GeneralInfo.LegalRegulations"
+						type="XML"
+                    />
+                </md:TabPanel>
+            </md:tabPanels>
+        </md:TabContainer>
 </core:FragmentDefinition>

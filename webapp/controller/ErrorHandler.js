@@ -47,18 +47,43 @@ sap.ui.define([
                 return;
             }
             this._bMessageOpen = true;
-            MessageBox.error(
-                this._sErrorText,
-                {
-                    id : "serviceErrorMessageBox",
-                    details : sDetails,
-                    styleClass : this._oComponent.getContentDensityClass(),
-                    actions : [MessageBox.Action.CLOSE],
-                    onClose : function () {
-                        this._bMessageOpen = false;
-                    }.bind(this)
+
+            if(sDetails.statusCode === "403"){
+                this._oComponent.getEventBus()?.publish("general", "notAuthorized");
+            }
+
+            try{
+                if(sDetails?.responseText){
+                    const oError = JSON.parse(sDetails.responseText);
+                    MessageBox.error(
+                        this._sErrorText,
+                        {
+                            id : "serviceErrorMessageBox",
+                            details : oError.error.message.value + "(" +  oError.error.code + ")",
+                            styleClass : this._oComponent.getContentDensityClass(),
+                            actions : [MessageBox.Action.CLOSE],
+                            onClose : function () {
+                                this._bMessageOpen = false;
+                            }.bind(this)
+                        }
+                    );
                 }
-            );
+            }catch(e){
+                MessageBox.error(
+                    this._sErrorText,
+                    {
+                        id : "serviceErrorMessageBox",
+                        details : sDetails,
+                        styleClass : this._oComponent.getContentDensityClass(),
+                        actions : [MessageBox.Action.CLOSE],
+                        onClose : function () {
+                            this._bMessageOpen = false;
+                        }.bind(this)
+                    }
+                );
+            }
+
+           
         }
 
     });

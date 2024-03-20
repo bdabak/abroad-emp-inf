@@ -12,15 +12,15 @@
                 filters: [{
                     path: 'DocType',
                     operator: 'EQ',
-                    value1: '002'
+                    value1: '005'
                 }],
                 events: {
-                    dataRequested: '.onHRBPDocumentDataRequested',
-                    dataReceived: '.onHRBPDocumentDataReceived'
+                    dataRequested: '.onLegalRegulationsDataRequested',
+                    dataReceived: '.onLegalRegulationsDataReceived'
                 }
             }"
             busyIndicatorDelay="0"
-            busy="{detailView>/generalInformation/hrbpBusy}"
+            busy="{detailView>/generalInformation/legalRegulationsBusy}"
         >
             <core:Fragment
                 fragmentName="com.thy.ux.abroadempinf.fragments.GeneralInfo.DocumentInstance"
@@ -32,7 +32,7 @@
             icon="sap-icon://document"
             text="{i18n>noDocumentFoundTitle}"
             description="{i18n>noDocumentFoundText}"
-            visible="{= ${detailView>/generalInformation/hrbpReportCount} === 0 }"
+            visible="{= ${detailView>/generalInformation/legalRegulationsCount} === 0 }"
             busyIndicatorDelay="0"
             busy="{detailView>/generalInformation/hrbpBusy}"
         />

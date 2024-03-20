@@ -12,7 +12,8 @@
         <f:FlexibleColumnLayout
             id="layout"
             layout="{appView>/layout}"
-            backgroundDesign="Translucent">
+            backgroundDesign="Translucent"
+            class="taeColumnLayout">
         </f:FlexibleColumnLayout>
     </App>
 </mvc:View>

@@ -4,6 +4,14 @@ sap.ui.define(
     "sap/ui/model/json/JSONModel",
     "sap/ui/core/Fragment",
     "sap/ui/core/ComponentContainer",
+    "sap/ui/core/format/NumberFormat",
+    "com/thy/ux/abroadempinf/ux/Divider",
+    "sap/ui/model/Filter",
+    "sap/ui/model/FilterOperator",
+    "sap/m/QuickView",
+    "sap/m/QuickViewPage",
+    "sap/m/QuickViewGroup",
+    "sap/m/QuickViewGroupElement",
     "com/thy/ux/abroadempinf/model/formatter",
   ],
   function (
@@ -11,6 +19,14 @@ sap.ui.define(
     JSONModel,
     Fragment,
     ComponentContainer,
+    NumberFormat,
+    Divider,
+    Filter,
+    FilterOperator,
+    QuickView,
+    QuickViewPage,
+    QuickViewGroup,
+    QuickViewGroupElement,
     formatter
   ) {
     "use strict";
@@ -34,8 +50,12 @@ sap.ui.define(
             mercerReportCount: 0,
             hrbpBusy: false,
             hrbpReportCount: 0,
-            draftBusy: false,
-            draftContractCount: 0,
+            draftCentralBusy: false,
+            draftContractCentralCount: 0,
+            draftLocalBusy: false,
+            draftContractLocalCount: 0,
+            legalRegulationsBusy: false,
+            legalRegulationsCount: 0,
           },
           benefitsInformation: {
             benefitBusy: false,
@@ -51,19 +71,29 @@ sap.ui.define(
             busy: false,
             count: 0,
           },
+          legislation: {
+            busy: false,
+            visible: false
+          },
+          compensationManagement: this._invalidateCompensation(),
         });
         this.setModel(oViewModel, "detailView");
 
         //--Event handler
         this.oEventBus = this.getOwnerComponent().getEventBus();
+        this.oEventBus.subscribe(
+          "general",
+          "notAuthorized",
+          this.handleNotAuthorized,
+          this
+        );
 
         this.getRouter()
           .getRoute("detail")
           .attachPatternMatched(this._onDetailMatched, this);
-        // this.getRouter()
-        //   .getRoute("scaleDisplay")
-        //   .attachPatternMatched(this._onScaleMatched, this);
+        
       },
+
       onExit: function () {
         for (var sPropertyName in this._formFragments) {
           if (
@@ -76,6 +106,13 @@ sap.ui.define(
           this._formFragments[sPropertyName].destroy();
           this._formFragments[sPropertyName] = null;
         }
+
+        this.oEventBus.unsubscribe(
+          "general",
+          "notAuthorized",
+          this.handleNotAuthorized,
+          this
+        );
       },
 
       /* =========================================================== */
@@ -111,14 +148,28 @@ sap.ui.define(
         );
       },
 
-      onDraftDocumentDataRequested: function (oEvent) {
-        this._setDocStatistic("draftBusy", true);
-        this._setDocStatistic("draftContractCount");
+      onDraftCentralDocumentDataRequested: function (oEvent) {
+        this._setDocStatistic("draftCentralBusy", true);
+        this._setDocStatistic("draftContractCentralCount");
       },
-      onDraftDocumentDataReceived: function (oEvent) {
-        this._setDocStatistic("draftBusy", false);
+
+      onDraftCentralDocumentDataReceived: function (oEvent) {
+        this._setDocStatistic("draftCentralBusy", false);
         this._setDocStatistic(
-          "draftContractCount",
+          "draftContractCentralCount",
+          oEvent.getParameter("data")?.results?.length || 0
+        );
+      },
+
+      onDraftLocalDocumentDataRequested: function (oEvent) {
+        this._setDocStatistic("draftLocalBusy", true);
+        this._setDocStatistic("draftContractLocalCount");
+      },
+
+      onDraftLocalDocumentDataReceived: function (oEvent) {
+        this._setDocStatistic("draftLocalBusy", false);
+        this._setDocStatistic(
+          "draftContractLocalCount",
           oEvent.getParameter("data")?.results?.length || 0
         );
       },
@@ -130,6 +181,17 @@ sap.ui.define(
         this._setBenStatistic("benefitBusy", false);
         this._setBenStatistic(
           "benefitCount",
+          oEvent.getParameter("data")?.results?.length || 0
+        );
+      },
+      onCompensationDataRequested: function () {
+        this._setCompStatistic("busy", true);
+        this._setCompStatistic("employeeCount", 0);
+      },
+      onCompensationDataReceived: function (oEvent) {
+        this._setCompStatistic("busy", false);
+        this._setCompStatistic(
+          "employeeCount",
           oEvent.getParameter("data")?.results?.length || 0
         );
       },
@@ -157,6 +219,19 @@ sap.ui.define(
         );
       },
 
+      onLegalRegulationsDataRequested: function (oEvent) {
+        this._setDocStatistic("legalRegulationsBusy", true);
+        this._setDocStatistic("legalRegulationsCount");
+      },
+
+      onLegalRegulationsDataReceived: function (oEvent) {
+        this._setDocStatistic("legalRegulationsBusy", false);
+        this._setDocStatistic(
+          "legalRegulationsCount",
+          oEvent.getParameter("data")?.results?.length || 0
+        );
+      },
+
       onWorkExperienceDataRequested: function () {
         this._setWexStatistic("busy", true);
         this._setWexStatistic("count", 0);
@@ -169,14 +244,21 @@ sap.ui.define(
           oEvent.getParameter("data")?.results?.length || 0
         );
       },
+      onLegislationDataRequested: function(){
+        this._setLegStatistic("busy", true);
+      },
+
+      onLegislationDataReceived: function(){
+        this._setLegStatistic("busy", false);
+      },
 
       onAfterCloseWorkExperience: function (oEvent) {
         var oPopover = oEvent.getSource();
         oPopover.destroy();
         this._oWexPopover = null;
       },
-      onCloseWorkExperience: function(){
-        if(this._oWexPopover){
+      onCloseWorkExperience: function () {
+        if (this._oWexPopover) {
           this._oWexPopover.close();
         }
       },
@@ -195,34 +277,413 @@ sap.ui.define(
           return o;
         });
 
-        oPromise.then(function (oPopover) {
-          this._oWexPopover = oPopover;
-          this._oWexPopover.openBy(oSource);
-        }.bind(this));
+        oPromise.then(
+          function (oPopover) {
+            this._oWexPopover = oPopover;
+            this._oWexPopover.openBy(oSource);
+          }.bind(this)
+        );
       },
 
       onCallResume: function (oEvent) {
         var oSource = oEvent.getSource();
         var sId = oSource.data("employeeId");
+        var sName = oSource.data("employeeName");
 
-        this.oCrossAppNavigator =
-          sap?.ushell?.Container?.getService("CrossApplicationNavigation") ||
-          null;
-        if (this.oCrossAppNavigator) {
-          this.oCrossAppNavigator.toExternal({
-            target: {
-              semanticObject: "Z5HPA_CV",
-              action: "display",
-            },
-            params: {
-              pernr: sId,
-            },
-          });
+        const sDownloadUrl = `/sap/opu/odata/sap/ZGHPA_CV_SRV/CvPdfSet(Pernr='${sId}',Selections='organisationSectionS1-additonalDutySectionS1-deputationSectionS1-personalSectionS1-partnerSectionS1-SchoolSectionS1-qualificationSectionS1-qualificationothersSectionS1-awardSectionS1-punishmentSectionS1-leaveSectionS1-UiSectionS1-statisticSectionS1-contactSectionS1')/$value`;
+
+        sap.m.URLHelper.redirect(sDownloadUrl, true);
+
+        this.toastMessage("I", "RESUME", "RESUME_BEING_DOWNLOADED",  [sName])
+
+        // https://tempotest.thy.com/sap/opu/odata/sap/ZGHPA_CV_SRV/CvPdfSet(Pernr='00052805',Selections='organisationSectionS1-additonalDutySectionS1-deputationSectionS1-personalSectionS1-partnerSectionS1-SchoolSectionS1-qualificationSectionS1-qualificationothersSectionS1-awardSectionS1-punishmentSectionS1-leaveSectionS1-UiSectionS1-statisticSectionS1-contactSectionS1')/$value
+
+        // this.oCrossAppNavigator =
+        //   sap?.ushell?.Container?.getService("CrossApplicationNavigation") ||
+        //   null;
+        // if (this.oCrossAppNavigator) {
+        //   this.oCrossAppNavigator.toExternal({
+        //     target: {
+        //       semanticObject: "Z5HPA_CV",
+        //       action: "display",
+        //     },
+        //     params: {
+        //       pernr: sId,
+        //     },
+        //   });
+        // }
+      },
+      handleNotAuthorized: function () {
+        this.getModel("appView").setProperty("/layout", "OneColumn");
+        this.getRouter().navTo("list");
+      },
+      onWageEntered: function (oEvent) {
+        const oSource = oEvent.getSource();
+        const oData = oSource.data("CompData");
+
+        this._setCompStatistic("saveAllowed", false);
+
+        let sNewValue = oEvent.getParameter("newValue");
+
+        try {
+          sNewValue = parseFloat(sNewValue.replace(/,/g, "."));
+        } catch (e) {
+          //
+        }
+
+        oSource.setValueState(null);
+        oSource.setValueStateText(null);
+
+        if (isNaN(sNewValue)) {
+          oSource.setValue("0");
+          this.alertMessage("E", "ERROR_MESSAGE", "ENTER_A_VALID_WAGE", []);
+          oSource.setValueState("Error");
+          oSource.setValueStateText(this.getText("ENTER_A_VALID_WAGE", []));
+          return;
+        }
+
+        if (parseFloat(oData.NewWage) < parseFloat(oData.CurrentWage)) {
+          oSource.setValueState("Error");
+          this.alertMessage("E", "ERROR_MESSAGE", "ENTER_GREATER_THAN_CUR", [
+            parseFloat(oData.NewWage),
+            parseFloat(oData.CurrentWage),
+          ]);
+          oSource.setValueStateText(
+            this.getText("ENTER_GREATER_THAN_CUR", [
+              parseFloat(oData.NewWage),
+              parseFloat(oData.CurrentWage),
+            ])
+          );
+          return;
+        }
+
+        this.handleCompChecks();
+
+      },
+
+      handleCompChecks: function (bReturnOk = false) {
+        const oViewModel = this.getModel("detailView");
+        const aComp = _.cloneDeep(
+          oViewModel.getProperty("/compensationManagement/compensationData")
+        );
+
+        let aOk = [];
+
+        let bSaveActive = false;
+        let iMailTrigger = 0;
+        let iOk = 0;
+
+        this._setCompStatistic("saveAllowed", false);
+
+        aComp.forEach((oComp) => {
+          if (
+            parseFloat(oComp.NewWage) > 0 &&
+            parseFloat(oComp.WageRangeMin) > 0 &&
+            parseFloat(oComp.WageRangeMax) > 0
+          ) {
+            if (
+              parseFloat(oComp.NewWage) > parseFloat(oComp.WageRangeMax) ||
+              parseFloat(oComp.NewWage) < parseFloat(oComp.WageRangeMin)
+            ) {
+              oComp.OverLimit = true;
+            } else {
+              oComp.OverLimit = false;
+              oComp.MailTriggered = false;
+            }
+
+            oComp.NewWage = parseFloat(oComp.NewWage).toFixed(2).toString();
+
+            if (oComp.OverLimit === true && oComp.MailTriggered === true) {
+              iOk++;
+              aOk.push(oComp);
+            } else {
+              if (oComp.OverLimit === true && oComp.MailTriggered !== true) {
+                iMailTrigger++;
+              } else {
+                if (
+                  parseFloat(oComp.NewWage) >= parseFloat(oComp.WageRangeMin) &&
+                  parseFloat(oComp.NewWage) <= parseFloat(oComp.WageRangeMax)
+                ) {
+                  iOk++;
+                  aOk.push(oComp);
+                }
+              }
+            }
+          } else {
+            oComp.MailTriggered = false;
+            oComp.OverLimit = false;
+          }
+        });
+
+        if (!bReturnOk) {
+          if (iOk > 0 && iMailTrigger === 0) {
+            bSaveActive = true;
+            this.toastMessage("S", "SAVE_ACTIVE", "CHANGES_CAN_BE_SAVED", [
+              iOk,
+            ]);
+          } else if (iMailTrigger > 0) {
+            this.alertMessage("W", "MAIL_TRIGGER", "MAIL_TRIGGER_MESSAGE", [
+              iMailTrigger,
+            ]);
+          }
+          this._setCompStatistic("compensationData", aComp);
+          this._setCompStatistic("saveAllowed", bSaveActive);
+        }
+
+        if (bReturnOk) {
+          return aOk;
+        }
+      },
+
+      onCompEmailPress: function (oEvent) {
+        const oSource = oEvent.getSource();
+        const sId = oSource.data("EmployeeId") || null;
+        const sName = oSource.data("EmployeeName");
+        if (sId !== null) {
+          const oViewModel = this.getModel("detailView");
+          const aComp = oViewModel.getProperty(
+            "/compensationManagement/compensationData"
+          );
+
+          let iIndex = _.findIndex(aComp, ["Id", sId]);
+
+          if (iIndex !== -1 && aComp[iIndex]) {
+            aComp[iIndex].MailTriggered = true;
+            oViewModel.setProperty(
+              "/compensationManagement/compensationData",
+              aComp
+            );
+
+            this.handleCompChecks();
+          }
+
+          try {
+            sap.m.URLHelper.triggerEmail(
+              "ucretveyanhaklarmdydisi@thy.com",
+              `${sName}(${sId}) Ücret Artışı Hakkında`,
+              ``
+            );
+          } catch (e) {}
+        }
+      },
+      onCompEmployeePress: function (oEvent) {
+        const oSource = oEvent.getSource();
+        const sSen = oSource.data("SeniorityInYears");
+        const sExp = oSource.data("ExperienceInYears");
+
+        const oFormat = NumberFormat.getFloatInstance({
+          groupingEnabled: false, // grouping is enabled
+          decimalSeparator: ",", // the decimal separator must be different from the grouping separator
+        });
+
+        const oPopover = new sap.m.Popover({
+          content: [
+            new sap.m.HBox({
+              alignItems: "Center",
+              justifyContent: "Center",
+              height: "100%",
+              items: [
+                new sap.m.VBox({
+                  alignItems: "Center",
+                  justifyContent: "Center",
+                  items: [
+                    new sap.m.Label({
+                      text: "{i18n>SENIORITY}",
+                    }),
+                    new sap.m.Text({
+                      text: oFormat.format(sSen),
+                    }),
+                  ],
+                }),
+                new Divider(),
+                new sap.m.VBox({
+                  alignItems: "Center",
+                  justifyContent: "Center",
+                  items: [
+                    new sap.m.Label({
+                      text: "{i18n>EXPERIENCE}",
+                    }),
+                    new sap.m.Text({
+                      text: oFormat.format(sExp),
+                    }),
+                  ],
+                }),
+              ],
+            }),
+          ],
+          afterClose: () => {
+            oPopover.destroy();
+          },
+          showHeader: false,
+        }).addStyleClass("sapUiContentPadding");
+
+        this.getView().addDependent(oPopover);
+
+        oPopover.openBy(oSource);
+      },
+      onCompEmployeeInfoPress: function (oEvent) {
+        const oSource = oEvent.getSource();
+        const oEmployee = oSource.data("EmployeeData");
+        const oFormat = NumberFormat.getFloatInstance({
+          groupingEnabled: false, // grouping is enabled
+          decimalSeparator: ",", // the decimal separator must be different from the grouping separator
+        });
+
+        const oPopover = new QuickView({
+          afterClose: () => {
+            oPopover.destroy();
+          },
+          pages: [
+            new QuickViewPage({
+              header: "Çalışan Bilgileri",
+              title: oEmployee.EmployeeName,
+              description: oEmployee.PositionText,
+              icon: `/sap/opu/odata/sap/ZHCM_UX_TABIN_SRV/EmployeeSet('${oEmployee.Id}')/$value`,
+              groups: [
+                new QuickViewGroup({
+                  heading: "Organizasyon ve Eğitim",
+                  elements: [
+                    new QuickViewGroupElement({
+                      label: "Organizasyon Birimi",
+                      value: oEmployee.OrganizationText,
+                    }),
+                    // new QuickViewGroupElement({
+                    //   label: "İş",
+                    //   value: oEmployee.JobText
+                    // }),
+                    new QuickViewGroupElement({
+                      label: "Eğitim Durumu",
+                      value: oEmployee.EducationStatusText
+                        ? oEmployee.EducationStatusText
+                        : "-",
+                    }),
+                  ],
+                }),
+                new QuickViewGroup({
+                  heading: "Kıdem Bilgileri",
+                  elements: [
+                    new QuickViewGroupElement({
+                      label: "Kıdem (Gün)",
+                      value: oEmployee.SeniorityInDays,
+                    }),
+                    new QuickViewGroupElement({
+                      label: "Kıdem (Yıl)",
+                      value: oFormat.format(oEmployee.SeniorityInYears),
+                    }),
+                  ],
+                }),
+                new QuickViewGroup({
+                  heading: "Önceki Tecrübe Bilgileri",
+                  elements: [
+                    new QuickViewGroupElement({
+                      label: "Tecrübe (Gün)",
+                      value: oEmployee.ExperienceInDays
+                        ? oEmployee.ExperienceInDays
+                        : "-",
+                    }),
+                    new QuickViewGroupElement({
+                      label: "Tecrübe (Yıl)",
+                      value: oEmployee.ExperienceInYears
+                        ? oFormat.format(oEmployee.ExperienceInYears)
+                        : "-",
+                    }),
+                  ],
+                  visible: oEmployee.ExperienceInDays ? true : false,
+                }),
+              ],
+            }),
+          ],
+        });
+
+        oPopover.openBy(oSource);
+      },
+
+      onCompSaveChanges: function () {
+        const oModel = this.getModel();
+        const oViewModel = this.getModel("detailView");
+        let aComp = this.handleCompChecks(true) || [];
+
+        if (aComp.length === 0) {
+          return 0;
+        }
+
+        const sPath = "/CompensationOperationSet";
+
+        let oPayload = {
+          Id: this.sObjectId,
+          Opera: "SAVE",
+          CompensationSet: aComp,
+        };
+
+        this.openBusyFragment("COMPENSATION_DATA_BEING_SAVED", []);
+        oModel.create(sPath, oPayload, {
+          success: () => {
+            this.closeBusyFragment();
+            this.toastMessage(
+              "S",
+              "SUCCESS_MESSAGE",
+              "COMPENSATION_DATA_SAVED",
+              []
+            );
+            this._refreshCompensation();
+          },
+          error: () => {
+            this.closeBusyFragment();
+          },
+        });
+      },
+
+      onSideFilterSelect: function(oEvent){
+        const oSource = oEvent.getParameter("selectedItem");
+        let aKeys = oSource.getKey().split("-");
+
+        if(aKeys.length === 2){
+          const oTable = this.byId("idLegislationItems") || sap.ui.getCore().byId("idLegislationItems");
+          if(!oTable){
+            return;
+          }
+          let aFilter = [
+            new Filter("CategoryId", FilterOperator.EQ, aKeys[0]),
+            new Filter("EmployeeClass", FilterOperator.EQ, aKeys[1]),
+          ];
+          
+          oTable.getBinding("items").filter(aFilter);
+          
+          const oPage = this.byId("idLegislationItemsPage") || sap.ui.getCore().byId("idLegislationItemsPage");
+          
+          if(oPage){
+            oPage.bindProperty("title",{
+              parts:[
+                {value: aKeys[1] === "1" ? "Mahalli - " : "Merkez Tayinli - "},
+                {path: `/LegislationCategorySet('${aKeys[0]}')/CategoryText`},
+              ]
+            });
+          }
+
+          this._setLegStatistic("visible", true)
         }
       },
       /* =========================================================== */
       /* begin: internal methods                                     */
       /* =========================================================== */
+      _refreshCompensationStatistic: function () {
+        const oModel = this.getModel();
+        const oInput = sap.ui.getCore().byId("idAverageIncreaseRate");
+
+        const sPath = oModel.createKey("/CompensationRateSet", {
+          Id: this.sObjectId,
+        });
+
+        oInput.setBusy(true);
+        oModel.read(sPath, {
+          success: () => {
+            oInput.setBusy(false);
+          },
+          error: () => {
+            oInput.setBusy(false);
+          },
+        });
+      },
       _setDocStatistic: function (p, v = 0) {
         var oViewModel = this.getModel("detailView");
         oViewModel.setProperty("/generalInformation/" + p, v);
@@ -230,6 +691,10 @@ sap.ui.define(
       _setBenStatistic: function (p, v = 0) {
         var oViewModel = this.getModel("detailView");
         oViewModel.setProperty("/benefitsInformation/" + p, v);
+      },
+      _setCompStatistic: function (p, v = 0) {
+        var oViewModel = this.getModel("detailView");
+        oViewModel.setProperty("/compensationManagement/" + p, v);
       },
       _setEmpStatistic: function (p, v = 0) {
         var oViewModel = this.getModel("detailView");
@@ -239,6 +704,11 @@ sap.ui.define(
         var oViewModel = this.getModel("detailView");
         oViewModel.setProperty("/workExperience/" + p, v);
       },
+      _setLegStatistic: function (p, v = 0) {
+        var oViewModel = this.getModel("detailView");
+        oViewModel.setProperty("/legislation/" + p, v);
+      },
+
 
       /**
        * Binds the view to the object path and expands the aggregated line items.
@@ -325,7 +795,7 @@ sap.ui.define(
             dataRequested: function () {
               oViewModel.setProperty("/busy", true);
             },
-            dataReceived: function (oData, oResponse) {
+            dataReceived: function () {
               oViewModel.setProperty("/busy", false);
             },
           },
@@ -335,7 +805,6 @@ sap.ui.define(
       _formFragments: {},
 
       _setContentFragment: function (oApp, oPage) {
-
         // this._setFormFragment(oApp.ApplicationKey, oPage);
 
         var that = this;
@@ -349,48 +818,137 @@ sap.ui.define(
             case "PayScaleInfo":
               that._loadPayScaleInfo(oApp, oPage, oContent);
               break;
+            case "CompensationManagement":
+              that._refreshCompensation(oPage, oContent);
+              break;
+            case "Legislations":
+              that._loadLegislations(oPage, oContent);
+              break;
             default:
               oPage.setContent(oContent);
           }
         });
       },
 
-      _modifyPayScalePage: function(oComp){
-        var oPage = oComp.getAggregation("rootControl").getAggregation("content")[0]
-        oPage.removeStyleClass("sapUiContentPadding").addStyleClass("sapUiNoContentPadding");
+      _modifyPayScalePage: function (oComp) {
+        var oPage = oComp
+          .getAggregation("rootControl")
+          .getAggregation("content")[0];
+        oPage
+          .removeStyleClass("sapUiContentPadding")
+          .addStyleClass("sapUiNoContentPadding");
         var oPanel = oPage.getAggregation("content")[0];
-        oPanel.removeStyleClass("sapUiContentPadding").addStyleClass("sapUiNoContentPadding");
+        oPanel
+          .removeStyleClass("sapUiContentPadding")
+          .addStyleClass("sapUiNoContentPadding");
+      },
+      _invalidateCompensation: function () {
+        return {
+          busy: false,
+          employeeCount: 0,
+          compensationData: [],
+          increaseRateAverage: null,
+          saveAllowed: false,
+        };
+      },
+      _recalculateIncreaseRate: function () {
+        const oViewModel = this.getModel("detailView");
+        const aComp = oViewModel.getProperty(
+          "/compensationManagement/compensationData"
+        );
+
+        let dIncRateTotal = 0;
+        let iCount = 0;
+
+        aComp.forEach((oComp) => {
+          if (oComp.IncreasePercentage > 0) {
+            iCount++;
+            dIncRateTotal =
+              dIncRateTotal + parseFloat(oComp.IncreasePercentage);
+          }
+        });
+
+        if (iCount > 0) {
+          this._setCompStatistic(
+            "increaseRateAverage",
+            iCount > 0 ? parseFloat(dIncRateTotal / iCount) : null
+          );
+        }
+      },
+
+      _refreshCompensation: function (oPage = null, oContent = null) {
+        const oModel = this.getModel();
+        const oViewModel = this.getModel("detailView");
+
+        let aFilter = [
+          new Filter({
+            path: "Query",
+            operator: FilterOperator.EQ,
+            value1: this.sObjectId,
+          }),
+        ];
+
+        //--Initiate compensation data
+        oViewModel.setProperty(
+          "/compensationManagement",
+          this._invalidateCompensation()
+        );
+
+        this.openBusyFragment();
+
+        oModel.read("/CompensationSet", {
+          filters: aFilter,
+          success: (oData) => {
+            this._setCompStatistic("compensationData", oData.results);
+            this._setCompStatistic("employeeCount", oData.results?.length || 0);
+            this._recalculateIncreaseRate();
+            this.closeBusyFragment();
+            if (oPage) {
+              oPage.setContent(oContent);
+            }
+          },
+          error: (oError) => {
+            this.closeBusyFragment();
+          },
+        });
+      },
+      _loadLegislations: function ( oPage, oContent) {
+        this._setLegStatistic("visible", false);
+        oPage.setContent(oContent);
       },
       _loadPayScaleInfo: function (oApp, oPage, oContent) {
         oPage.setBusy(true);
         var aChunk = oApp?.Id.split("-") || [];
         var sRegion = null;
-        if(aChunk[2] && aChunk[3]){
-          sRegion = btoa(JSON.stringify({
-            Werks: aChunk[2],
-            Btrtl: aChunk[3]
-          }))
+        if (aChunk[2] && aChunk[3]) {
+          sRegion = btoa(
+            JSON.stringify({
+              Werks: aChunk[2],
+              Btrtl: aChunk[3],
+            })
+          );
         }
-        this.getOwnerComponent().createComponent({
-          usage: "scaleDisplayComponent",
+        this.getOwnerComponent()
+          .createComponent({
+            usage: "scaleDisplayComponent",
             settings: {},
             componentData: {
               startupParameters: {
-                RegionSelection: sRegion ? {
-                  0: sRegion
-                } : null  
+                RegionSelection: sRegion
+                  ? {
+                      0: sRegion,
+                    }
+                  : null,
               },
             },
             async: true,
-            manifest: true
+            manifest: true,
           })
           .then(
             function (oComp) {
               oContent.setComponent(oComp);
               this._modifyPayScalePage(oComp);
-              oPage.setContent(
-                oContent
-              );
+              oPage.setContent(oContent);
               oPage.setBusy(false);
             }.bind(this)
           )

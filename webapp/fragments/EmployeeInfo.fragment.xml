@@ -1,26 +1,88 @@
 <core:FragmentDefinition
-	xmlns="sap.m"
-	xmlns:core="sap.ui.core"
+    xmlns="sap.m"
+    xmlns:core="sap.ui.core"
+    xmlns:md="com.smod.ux.mat.controls"
 >
-<TabContainer class="tabsWithoutCloseButton">
+    <md:TabContainer class="mdTabContainer">
+        <md:tabs>
+            <md:Tab
+                id="idTabContainerEmpInfCent"
+                tabIndex="0"
+                variant="Primary"
+                inlineIcon="true"
+                title="{i18n>empInfoCentral}{
+                    path: 'detailView>/employeeInformation/centralEmployeeCount',
+                    formatter: '.formatter.suppressZero'
+                }"
+            >   
+                <md:Icon icon="frame_person" />
+            </md:Tab>
+            <md:Tab
+                id="idTabContainerEmpInfLocal"
+                tabIndex="1"
+                variant="Primary"
+                inlineIcon="true"
+                
+                title="{i18n>empInfoLocal}{
+                    path: 'detailView>/employeeInformation/localEmployeeCount',
+                    formatter: '.formatter.suppressZero'
+                }"
+            >   
+                <md:Icon icon="local_library" />
+            </md:Tab>
+        </md:tabs>
+        <md:tabPanels>
+            <md:TabPanel
+                tabIndex="0"
+                class="mdTabPanel"
+            >
+                <core:Fragment
+                    fragmentName="com.thy.ux.abroadempinf.fragments.EmployeeInfo.CentralEmployee"
+                    type="XML"
+                />
+            </md:TabPanel>
+            <md:TabPanel
+                tabIndex="1"
+                class="mdTabPanel"
+            >
+                <core:Fragment
+                    fragmentName="com.thy.ux.abroadempinf.fragments.EmployeeInfo.LocalEmployee"
+                    type="XML"
+                />
+            </md:TabPanel>
+        </md:tabPanels>
+    </md:TabContainer>
+
+    <!-- <TabContainer class="tabsWithoutCloseButton">
         <items>
-           
-            <TabContainerItem id="idTabContainerEmpInfCent"  name="{i18n>empInfoCentral}{path: 'detailView>/employeeInformation/centralEmployeeCount', formatter:'.formatter.suppressZero'}">
+            <TabContainerItem
+                id="idTabContainerEmpInfCent"
+                name="{i18n>empInfoCentral}{
+                    path: 'detailView>/employeeInformation/centralEmployeeCount',
+                    formatter: '.formatter.suppressZero'
+                }"
+            >
                 <content>
                     <core:Fragment
                         fragmentName="com.thy.ux.abroadempinf.fragments.EmployeeInfo.CentralEmployee"
-						type="XML"
+                        type="XML"
                     />
                 </content>
             </TabContainerItem>
-             <TabContainerItem id="idTabContainerEmpInfLocal" name="{i18n>empInfoLocal}{path: 'detailView>/employeeInformation/localEmployeeCount', formatter:'.formatter.suppressZero'}">
+            <TabContainerItem
+                id="idTabContainerEmpInfLocal"
+                name="{i18n>empInfoLocal}{
+                    path: 'detailView>/employeeInformation/localEmployeeCount',
+                    formatter: '.formatter.suppressZero'
+                }"
+            >
                 <content>
                     <core:Fragment
                         fragmentName="com.thy.ux.abroadempinf.fragments.EmployeeInfo.LocalEmployee"
-						type="XML"
+                        type="XML"
                     />
                 </content>
             </TabContainerItem>
         </items>
-    </TabContainer>
+    </TabContainer> -->
 </core:FragmentDefinition>

@@ -57,6 +57,13 @@ sap.ui.define(
           this
         );
 
+        this.oEventBus.subscribe(
+          "general",
+          "notAuthorized",
+          this.handleNotAuthorized,
+          this
+        );
+
         this.getRouter()
           .getRoute("list")
           .attachPatternMatched(this._onListMatched, this);
@@ -72,6 +79,13 @@ sap.ui.define(
           this.handleDetailOpened,
           this
         );
+
+        this.oEventBus.unsubscribe(
+          "general",
+          "notAuthorized",
+          this.handleNotAuthorized,
+          this
+        );
       },
 
       /* =========================================================== */
@@ -83,9 +97,9 @@ sap.ui.define(
 
       onTreeDataReceived: function (oEvent) {
         var that = this;
-        if(!this._activeCitNode){
+        if (!this._activeCitNode) {
           this._oAppTree.setBusy(false);
-        }else{
+        } else {
           $.each(oEvent.getParameter("data")?.results, function (i, oItem) {
             if (oItem.Id === that._activeCitNode) {
               that._oAppTree.setBusy(false);
@@ -100,18 +114,9 @@ sap.ui.define(
 
         this._oAppTree.setBusy(false);
       },
-      onTreeUpdateFinished: function(){
-        if(!this._bAuthCheck){
-          this._bAuthCheck = true;
-          if(this._oAppTree?.getBinding("items")?.getChildCount() <= 0){
-            this.getRouter().navTo(
-              "notAuthorized",
-              null,
-              null,
-              true
-            );
-          }
-          
+      onTreeUpdateFinished: function () {
+        if (this._oAppTree?.getBinding("items")?.getChildCount() <= 0) {
+          this.getRouter().navTo("notAuthorized", null, null, true);
         }
       },
 
@@ -137,14 +142,14 @@ sap.ui.define(
         );
       },
 
-      onTreeCollapseAll: function(){
+      onTreeCollapseAll: function () {
         this._oAppTree.collapseAll();
       },
 
-      onTreeExpandAll: function(){
+      onTreeExpandAll: function () {
         this._oAppTree.expandToLevel(3);
       },
-      onTreeLocateNode: function(){
+      onTreeLocateNode: function () {
         var that = this;
         var aItems = this._oAppTree.getItems();
         $.each(aItems, function (i, oItem) {
@@ -197,7 +202,9 @@ sap.ui.define(
         // eslint-disable-next-line sap-no-history-manipulation
         history.go(-1);
       },
-
+      handleNotAuthorized: function () {
+        this.getModel("appView").setProperty("/layout", "OneColumn");
+      },
       /**
        * Event bus handler called when  <DetailOpened Custom Event> published
        * @public
@@ -211,9 +218,7 @@ sap.ui.define(
 
         this._expandPromise();
       },
-      onToggleOpenState: function (oEvent) {
-        
-      },
+      onToggleOpenState: function (oEvent) {},
       _expandPromise: function () {
         this.onTreeLocateNode();
       },
@@ -232,10 +237,9 @@ sap.ui.define(
         var that = this;
         //Set the layout property of the FCL control to 'OneColumn'
         this.getModel("appView").setProperty("/layout", "OneColumn");
-        setTimeout(()=>{
+        setTimeout(() => {
           that._oAppTree.collapseAll();
-        },300);
-        
+        }, 300);
       },
 
       /**
